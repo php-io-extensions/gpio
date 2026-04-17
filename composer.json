@@ -1,0 +1,30 @@
+{
+    "name": "php-io-extensions/gpio",
+    "type": "php-ext",
+    "description": "PHP-Controllable GPIO Extension",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Project Saturn Studios, LLC",
+            "email": "info@projectsaturnstudios.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.0"
+    },
+    "php-ext": {
+        "extension-name": "gpio",
+        "priority": 30,
+        "build-path": "ext",
+        "support-zts": true,
+        "support-nts": true,
+        "os-families-exclude": ["windows"],
+        "configure-options": [
+            {
+                "name": "enable-gpio",
+                "description": "Enable the GPIO extension",
+                "needs-value": false
+            }
+        ]
+    }
+}
