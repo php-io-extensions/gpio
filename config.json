@@ -3,7 +3,14 @@
     "name": "gpio",
     "description": "PHP-Controllable GPIO Extension",
     "author": "Project Saturn Studios, LLC",
-    "version": "0.1.0",
+    "version": "0.1.1",
+    "extra-sources": [
+        "api/gpio-chip.c",
+        "api/gpio-line.c"
+    ],
+    "optimizer-dirs": [
+        "optimizers"
+    ],
     "warnings": {
         "unused-variable": true,
         "unused-variable-external": true,

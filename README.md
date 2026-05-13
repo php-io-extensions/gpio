@@ -6,23 +6,36 @@
 
 PHP-controllable Linux GPIO extension built with Zephir.
 
-The GPIO extension is an extension for PHP (running on Linux devices) that allows PHP to utilize the available GPIO in a given Linux device, allowing for control of sensors, interrupts and diodes.
-
-```shell
-git clone https://github.com/DeptOfScrapyardRobotics/GPIO
-cd GPIO
-bash install.sh
-```
+The GPIO extension is an extension for PHP running on supported Linux single-board computers. It allows PHP to use GPIO character devices for sensors, interrupts, LEDs, relays, fans, and similar hardware.
 
 ## Requirements
 
 - PHP 8.3+ with development headers (`php-dev` / `php-devel`)
-- [Zephir][zephir-install] 0.19+
 - [FD extension][fd-repo] — provides raw integer file descriptors via `Fd\FD::open()`
+- C build toolchain for PHP extensions (`gcc`, `make`, `phpize`, `autoconf`)
+- Supported Linux SBC platforms:
+  - Raspberry Pi boards running Debian Trixie
+  - NVIDIA Jetson Orin family boards running JetPack 6
 - Linux kernel with GPIO character device support (`/dev/gpiochipN`)
 - GPIO v2 userspace API — kernel 5.10+
 
 ## Installation
+
+### Automatic Installation
+
+[PHP PIE](https://github.com/php/pie) is the official PHP extension installer. It builds and enables the extension from the generated C sources in `ext/`.
+
+```shell
+pie install php-io-extensions/gpio
+```
+
+Automatic installation requires PIE and the C toolchain for building PHP extensions. Zephir is not required for automatic installation.
+
+Install the [FD extension][fd-repo] first — GPIO requires raw integer file descriptors that PHP's stream layer cannot provide.
+
+### Manual Installation
+
+Manual installation builds the extension from the Zephir source and requires [Zephir][zephir-install] 0.19+.
 
 Install Zephir if you haven't already:
 
@@ -30,27 +43,25 @@ Install Zephir if you haven't already:
 composer global require phalcon/zephir
 ```
 
-Install the [FD extension][fd-repo] first — GPIO requires raw integer file descriptors that PHP's stream layer cannot provide:
-
-```shell
-git clone https://github.com/DeptOfScrapyardRobotics/FD
-cd FD && bash install.sh
-```
-
-Then clone and build this extension:
+Use the installer for your target platform:
 
 ```shell
 git clone https://github.com/DeptOfScrapyardRobotics/GPIO
 cd GPIO
-bash install.sh
+
+# Raspberry Pi / Debian Trixie
+bash install-debian-trixie.sh
+
+# NVIDIA Jetson Orin / JetPack 6
+bash install-jetpack6.sh
 ```
 
-`install.sh` handles the full workflow: clean → build → copy `.so` → write `30-gpio.ini` into all detected `conf.d` directories → verify `php -m` → reload php-fpm if present.
+The installer handles the full workflow: clean → build → copy `.so` → write `30-gpio.ini` into detected `conf.d` directories → verify `php -m` → reload php-fpm if present.
 
 To use a specific Zephir binary:
 
 ```shell
-ZEPHIR_BIN=/path/to/zephir bash install.sh
+ZEPHIR_BIN=/path/to/zephir bash install-debian-trixie.sh
 ```
 
 ## API
@@ -202,6 +213,7 @@ GPIOLine::setValues($lineFd, 1); // HIGH — device on
 sleep(1);
 GPIOLine::setValues($lineFd, 0); // LOW  — device off
 
+FD::close($lineFd);
 FD::close($fd);
 ```
 
@@ -215,6 +227,7 @@ $lineFd = GPIOChip::getLine($fd, 27, 0x04, 0, 'my-app'); // INPUT
 $state = GPIOLine::getValues($lineFd);
 echo $state === 1 ? "HIGH\n" : "LOW\n";
 
+FD::close($lineFd);
 FD::close($fd);
 ```
 
@@ -251,7 +264,7 @@ FD::close($fd);
 
 ## License
 
-Copyright © Project Saturn Studios, LLC. All rights reserved.
+MIT License. See [LICENSE](LICENSE).
 
 [badge-php]: https://img.shields.io/badge/php-%3E%3D8.3-blue
 [badge-zephir]: https://img.shields.io/badge/zephir-0.19%2B-orange
